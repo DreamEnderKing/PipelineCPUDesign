@@ -7,6 +7,29 @@ module CPU(
 	output [32 -1:0] MemBus_Write_Data  , 
 	input  [32 -1:0] Device_Read_Data 
 );
+	// PipeLine register
+	reg  ID_EX_PCSrc            ;
+	reg  ID_EX_ALUSrc1          ;
+	reg  ID_EX_ALUSrc2          ;
+	reg  ID_EX_Op1              ;
+	reg  ID_EX_Op2              ;
+	reg  ID_EX_Imm              ;
+	reg  [4 -1:0] ID_EX_ALUOp	;
+	reg  ID_EX_MemRead          ;
+	reg  ID_EX_MemWrite         ;
+	reg  ID_EX_RegWrite	        ;
+	reg  [2 -1:0] ID_EX_RegDst  ;
+	reg  [2 -1:0] ID_EX_MemtoReg;
+
+	reg  EX_MEM_MemRead          	;
+	reg  EX_MEM_MemWrite         	;
+	reg  EX_MEM_RegWrite	        ;
+	reg  [2 -1:0] EX_MEM_RegDst  	;
+	reg  [2 -1:0] EX_MEM_MemtoReg	;
+
+	reg  MEM_WB_RegWrite	        ;
+	reg  [2 -1:0] MEM_WB_RegDst  	;
+	reg  [2 -1:0] MEM_WB_MemtoReg	;
 	
 	// PC register
 	reg  [31 :0] PC;
