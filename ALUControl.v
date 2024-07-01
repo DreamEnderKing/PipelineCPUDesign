@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 
 module ALUControl(
 	input  [4 -1:0] ALUOp      ,

@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 
 module Control(
 	input  [6 -1:0] OpCode   ,

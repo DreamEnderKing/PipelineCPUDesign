@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 module InstructionMemory(
 	input      [32 -1:0] Address, 
 	output reg [32 -1:0] Instruction

@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 
 module ALU(
 	input [32 -1:0] in1      , 

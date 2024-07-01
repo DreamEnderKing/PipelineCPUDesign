@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 module CPU(
 	input  reset                        , 
 	input  clk                          , 
@@ -5,7 +7,9 @@ module CPU(
 	output MemWrite                     ,
 	output [32 -1:0] MemBus_Address     , 
 	output [32 -1:0] MemBus_Write_Data  , 
-	input  [32 -1:0] Device_Read_Data 
+	input  [32 -1:0] Device_Read_Data 	,
+	output [ 3 -1:0] sel				,
+	output [ 8 -1:0] seg
 );
 	// PipeLine register
 	reg  ID_EX_PCSrc            ;
@@ -142,14 +146,16 @@ module CPU(
 	wire           Memory_Write     ;
 	wire [32 -1:0] MemBus_Read_Data ;
 
-	DataMemory data_memory1(
+	Bus bus1(
 		.reset      (reset              ), 
 		.clk        (clk                ), 
 		.Address    (MemBus_Address     ), 
 		.Write_data (MemBus_Write_Data  ), 
 		.Read_data  (Memory_Read_Data   ), 
 		.MemRead    (Memory_Read        ), 
-		.MemWrite   (Memory_Write       )
+		.MemWrite   (Memory_Write       ),
+		.sel		(sel				),
+		.seg		(seg				)
 	);
 
 	

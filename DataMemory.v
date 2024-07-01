@@ -1,4 +1,8 @@
-module DataMemory(
+`timescale 1ns / 1ns
+
+module DataMemory#(
+	parameter RAM_SIZE_BIT  = 8
+)(
 	input  reset    , 
 	input  clk      ,  
 	input  MemRead  ,
@@ -8,9 +12,8 @@ module DataMemory(
 	output [32 -1:0] Read_data
 );
 	
-	// RAM size is 256 words, each word is 32 bits, valid address is 8 bits
-	parameter RAM_SIZE      = 256;
-	parameter RAM_SIZE_BIT  = 8;
+	// RAM size is 2^{RAM_SIZE_BIT} words, each word is 4 bytes
+	parameter RAM_SIZE      = 2 << RAM_SIZE_BIT;
 	
 	// RAM_data is an array of 256 32-bit registers
 	reg [31:0] RAM_data [RAM_SIZE - 1: 0];
