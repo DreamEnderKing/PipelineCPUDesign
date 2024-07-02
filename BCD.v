@@ -17,7 +17,7 @@ module BCD(
 	assign sel = status[11:8];
 	assign seg = status[ 7:0];
 
-	always @(posedge clk) begin
+	always @(posedge clk or posedge reset) begin
 		if (reset)
 			status = 32'b0;
 		else if (StatusWrite)

@@ -23,7 +23,7 @@ module test_cpu();
 	
 	initial begin
 		reset   = 1;
-		clk     = 1;
+		clk     = 0;
 		#100 reset = 0;
 	end
 	

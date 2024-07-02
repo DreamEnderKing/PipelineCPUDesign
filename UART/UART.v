@@ -50,7 +50,7 @@ module UART#(
     );
     
     /*----------------------------------BUS Control----------------------------*/
-    always @(posedge clk)begin
+    always @(posedge clk or posedge reset)begin
         if (reset) begin
             Rx_Data <= 32'b0;
             Tx_Data <= 32'b0;

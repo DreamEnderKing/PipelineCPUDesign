@@ -29,18 +29,18 @@ module Bus(
 	DataMemory#(
 		.RAM_SIZE_BIT		(9						)
 	) DM1(
-		.reset				((id == 0) && reset		),
+		.reset				(reset					),
 		.clk				(clk					),
 		.MemRead			((id == 0) && MemRead	),
 		.MemWrite			((id == 0) && MemWrite	),
-		.Address			((id == 0) && Address	),
-		.Write_data			((id == 0) && Write_data),
+		.Address			(Address				),
+		.Write_data			(Write_data				),
 		.Read_data			(Read_data0				)
 	);
 
 	// BCD in 0x4000_0010(BCD_ADDR)
 	BCD bcd(
-		.reset				((id == 1) && reset		),
+		.reset				(reset					),
 		.clk				(clk					),
 		.StatusRead			((id == 1) && MemRead	),
 		.StatusWrite		((id == 1) && MemWrite	),
@@ -55,12 +55,12 @@ module Bus(
 		.CLKS_PER_BIT  		(10417 					), // 100MHz/9600Hz
     	.BASE_ADDR			(32'h4000_0020			)
 	) uart(
-		.reset				((id == 2) && reset		),
+		.reset				(reset					),
 		.clk				(clk					),
 		.MemRead			((id == 2) && MemRead	),
 		.MemWrite			((id == 2) && MemWrite	),
-		.Address			((id == 2) && Address	),
-		.Write_data			((id == 2) && Write_data),
+		.Address			(Address				),
+		.Write_data			(Write_data				),
 		.Read_data			(Read_data2				)		
 	);
 			
