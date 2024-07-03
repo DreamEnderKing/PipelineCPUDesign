@@ -81,7 +81,7 @@ module InstructionMemory(
 8'd69: Instruction <= 32'h0810003f;
 8'd70: Instruction <= 32'had490000;
 8'd71: Instruction <= 32'h03e00008;
-
+8'd72: Instruction <= 32'h00400120;
 			// -------- Paste Binary Instruction Above
 			
 			default: Instruction <= 32'h00000000;
