@@ -25,10 +25,13 @@ module RegisterFile(
 	integer i;
 	// write Wrtie_data to RF_data at clock posedge
 	always @(posedge reset or posedge clk)
-		if (reset)
-			for (i = 1; i < 32; i = i + 1)
+		if (reset) begin
+			for (i = 1; i < 29; i = i + 1)
 				RF_data[i] <= 32'h00000000;
-		else if (RegWrite && (Write_register != 5'b00000))
+			RF_data[29] <= 32'h000007FC;		// set $sp to the top of memory
+			for (i = 30; i < 32; i = i + 1)
+				RF_data[i] <= 32'h00000000;
+		end else if (RegWrite && (Write_register != 5'b00000))
 			RF_data[Write_register] <= Write_data;
 
 endmodule

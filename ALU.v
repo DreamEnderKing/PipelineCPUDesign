@@ -6,10 +6,14 @@ module ALU(
 	input [5 -1:0] ALUCtl    ,
 	input Sign               ,
 	output reg [32 -1:0] out ,
-	output zero
+	output zero              ,
+	output less
 );
 	// zero means whether the output is zero or not
 	assign zero = (out == 0);
+
+	// less means whether the output is less than zero or not
+	assign less = (out[31] == 1);
 	
 	wire ss;
 	assign ss = {in1[31], in2[31]};
