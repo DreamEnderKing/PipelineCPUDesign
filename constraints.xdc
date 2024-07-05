@@ -22,8 +22,8 @@ set_property -dict {PACKAGE_PIN K2 IOSTANDARD LVCMOS33} [get_ports {gpio[3]}]
 set_property -dict {PACKAGE_PIN K1 IOSTANDARD LVCMOS33} [get_ports {gpio[4]}]
 set_property -dict {PACKAGE_PIN L3 IOSTANDARD LVCMOS33} [get_ports {gpio[5]}]
 
-set_property -dict {PACKAGE_PIN V2 IOSTANDARD LVCMOS33} [get_ports MemRead]
-set_property -dict {PACKAGE_PIN W1 IOSTANDARD LVCMOS33} [get_ports MemWrite]
 set_property -dict {PACKAGE_PIN AB2 IOSTANDARD LVCMOS33} [get_ports ResetLed]
+set_property -dict {PACKAGE_PIN B20 IOSTANDARD LVCMOS33} [get_ports Rx_Serial]
+set_property -dict {PACKAGE_PIN A20 IOSTANDARD LVCMOS33} [get_ports Tx_Serial]
 
 create_clock -period 10.000 -name clk -waveform {0.000 5.000} [get_ports clk]

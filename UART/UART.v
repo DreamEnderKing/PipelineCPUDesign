@@ -8,9 +8,11 @@ module UART#(
     input clk,
     input MemRead,
     input MemWrite,
-    input  [32 -1:0] Address    ,
-	input  [32 -1:0] Write_data ,
-	output [32 -1:0] Read_data
+    input  [32 -1:0] Address,
+	input  [32 -1:0] Write_data,
+	output [32 -1:0] Read_data,
+    input Rx_Serial,
+    output Tx_Serial
 );
 
     parameter Tx_ADDR   = BASE_ADDR - 8 ;
@@ -20,7 +22,10 @@ module UART#(
     reg  [32 -1:0] Rx_Data  ;
     reg  [32 -1:0] Tx_Data  ;
     reg  [32 -1:0] Cond     ;
-    reg  [32 -1:0] Out_Data ;
+    assign Read_data = (Address == Tx_ADDR)? Tx_Data:
+        (Address == Rx_ADDR)? Rx_Data:
+        (Address == Cond_ADDR)? Cond: 32'b0;
+    
     /*--------------------------------UART RX-------------------------*/
     wire Rx_DV  ;
     wire Rx_Byte;
@@ -62,20 +67,15 @@ module UART#(
                 Rx_Data[7:0] <= Rx_Byte;
             end
 
-            if (MemRead) begin
-                if (Address == Cond_ADDR) begin
-                    Cond[1] <= Rx_DV;
-                    Cond[2] <= Tx_Done;
-                end
-                Out_Data <= (Address == Tx_ADDR)? Tx_Data:
-                    (Address == Rx_ADDR)? Rx_Data:
-                    (Address == Cond_ADDR)? Cond: 32'b0;
+            if (MemRead && Address == Cond_ADDR) begin
+                Cond[1] <= Tx_Done;
+                Cond[2] <= Rx_DV;
             end else begin
-                Cond[1] <= Rx_DV || Cond[1];
-                Cond[2] <= Tx_Done || Cond[2];
-                Cond[3] <= Tx_Active;
+                Cond[1] <= Tx_Done || Cond[1];
+                Cond[2] <= Rx_DV || Cond[2];
             end
-
+            Cond[3] <= Tx_Active;
+            
             if (MemWrite) begin
                 if (Address == Tx_ADDR) begin
                     Tx_Data <= Write_data;

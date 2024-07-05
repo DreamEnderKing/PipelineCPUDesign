@@ -3,13 +3,11 @@
 module CPU(
 	input  reset                        , 
 	input  clk                          , 
-	output MemRead                      , 
-	output MemWrite                     ,
+	output MemBus_Read                  , 
+	output MemBus_Write                 ,
 	output [32 -1:0] MemBus_Address     , 
 	output [32 -1:0] MemBus_Write_Data  , 
-	input  [32 -1:0] Device_Read_Data 	,
-	output [ 4 -1:0] sel				,
-	output [ 8 -1:0] seg
+	input  [32 -1:0] MemBus_Read_Data
 );
 
 	// PC register
@@ -159,27 +157,15 @@ module CPU(
 		.less   (Less       )
 	);
 		
-	// Data Memory
-	wire [32 -1:0] MemBus_Read_Data ;
-
+	// Bus operation
+	assign MemBus_Read			= `EX_MEM_MemRead;
+	assign MemBus_Write			= `EX_MEM_MemWrite;
 	assign MemBus_Address       = `EX_MEM_ALUout;
 	assign MemBus_Write_Data    = `EX_MEM_WriteData;
 	
 	// Warning: PC data is passed in ALUout!
 	assign Databus3 = (`EX_MEM_MemtoReg == 2'b00)? `EX_MEM_ALUout:
 		(`EX_MEM_MemtoReg == 2'b01)? MemBus_Read_Data: `EX_MEM_ALUout;
-
-	Bus bus1(
-		.reset      (reset				), 
-		.clk        (clk				), 
-		.Address    (MemBus_Address		), 
-		.Write_data (MemBus_Write_Data	), 
-		.Read_data  (MemBus_Read_Data	), 
-		.MemRead    (`EX_MEM_MemRead	), 
-		.MemWrite   (`EX_MEM_MemWrite	),
-		.sel		(sel				),
-		.seg		(seg				)
-	);
 
 	// Load Use Hazard
 	assign stall = (`ID_EX_MemRead && `ID_EX_RegDst != 5'b0 &&
