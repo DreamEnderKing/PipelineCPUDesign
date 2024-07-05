@@ -7,7 +7,7 @@ module BCD(
 	input  StatusWrite			,
 	input  [32 -1:0] Write_data	,
 	output [32 -1:0] Read_data	,
-	output [ 3 -1:0] sel		,
+	output [ 4 -1:0] sel		,
 	output [ 8 -1:0] seg
 );
 

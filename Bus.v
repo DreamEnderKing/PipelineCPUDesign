@@ -8,7 +8,7 @@ module Bus(
 	input  [32 -1:0] Address    ,
 	input  [32 -1:0] Write_data ,
 	output [32 -1:0] Read_data	,
-	output [ 3 -1:0] sel		,
+	output [ 4 -1:0] sel		,
 	output [ 8 -1:0] seg
 );
 
@@ -44,7 +44,7 @@ module Bus(
 		.clk				(clk					),
 		.StatusRead			((id == 1) && MemRead	),
 		.StatusWrite		((id == 1) && MemWrite	),
-		.Write_data			((id == 1) && Write_data),
+		.Write_data			(Write_data             ),
 		.Read_data			(Read_data1				),
 		.sel				(sel					),
 		.seg				(seg					)

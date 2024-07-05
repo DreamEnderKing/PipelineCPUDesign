@@ -8,7 +8,7 @@ module CPU(
 	output [32 -1:0] MemBus_Address     , 
 	output [32 -1:0] MemBus_Write_Data  , 
 	input  [32 -1:0] Device_Read_Data 	,
-	output [ 3 -1:0] sel				,
+	output [ 4 -1:0] sel				,
 	output [ 8 -1:0] seg
 );
 
@@ -187,7 +187,14 @@ module CPU(
 		5'b11: 5'b0;
 
 	// Control Hazard
-	assign flush = (`ID_EX_Branch && Zero)? 5'b11:
+	wire PCBranch;
+	assign PCBranch = (`ID_EX_Branch == 4'b1001 && Zero) ||
+		(`ID_EX_Branch == 4'b1000 && (~Zero)) ||
+		(`ID_EX_Branch == 4'b1011 && (Zero || Less)) ||
+		(`ID_EX_Branch == 4'b1100 && ~(Zero || Less)) ||
+		(`ID_EX_Branch == 4'b1010 && Less);
+	
+	assign flush = (PCBranch)? 5'b11:
 		(PCSrc == 2'b01 || PCSrc == 2'b10)? 5'b1: 5'b0;
 
 	always @(posedge clk or posedge reset) begin
@@ -305,23 +312,7 @@ module CPU(
 			// PC generate
 			if (stall[0]) begin
 				PC <= PC;
-			end else if (`ID_EX_Branch == 4'b1001 && Zero) begin
-				// Warning: Truncate PC value here
-				// PC - 4 to compensate the PC-increment in pipeline
-				PC <= PC - 4 + {`ID_EX_ALUImm, 2'b00};
-			end else if (`ID_EX_Branch == 4'b1000 && (~Zero)) begin
-				// Warning: Truncate PC value here
-				// PC - 4 to compensate the PC-increment in pipeline
-				PC <= PC - 4 + {`ID_EX_ALUImm, 2'b00};
-			end else if (`ID_EX_Branch == 4'b1011 && (Zero || Less)) begin
-				// Warning: Truncate PC value here
-				// PC - 4 to compensate the PC-increment in pipeline
-				PC <= PC - 4 + {`ID_EX_ALUImm, 2'b00};
-			end else if (`ID_EX_Branch == 4'b1100 && ~(Zero || Less)) begin
-				// Warning: Truncate PC value here
-				// PC - 4 to compensate the PC-increment in pipeline
-				PC <= PC - 4 + {`ID_EX_ALUImm, 2'b00};
-			end else if (`ID_EX_Branch == 4'b1010 && Less) begin
+			end else if (PCBranch) begin
 				// Warning: Truncate PC value here
 				// PC - 4 to compensate the PC-increment in pipeline
 				PC <= PC - 4 + {`ID_EX_ALUImm, 2'b00};
