@@ -29,7 +29,9 @@ module Control(
 		(OpCode == 6'h07)? 4'b1100:	// bgtz
 		(OpCode == 6'h01)? 4'b1010: 4'b0; // bltz
 
-	assign RegWrite = (OpCode == 6'h2b || OpCode == 6'h04 || OpCode == 6'h02 || (OpCode == 6'h00 && Funct == 6'h08))? 0: 1;
+	assign RegWrite = (OpCode == 6'h2b || OpCode == 6'h04 || OpCode == 6'h05 ||
+		OpCode == 6'h06 || OpCode == 6'h07 || OpCode == 6'h01 ||
+		OpCode == 6'h02 || (OpCode == 6'h00 && Funct == 6'h08))? 0: 1;
 
 	assign RegDst = (OpCode == 6'h03 || (OpCode == 6'h00 && Funct == 6'h09))? 2'b10:
 		(OpCode == 6'h00 || OpCode == 6'h1c)? 2'b01 : 2'b00;
@@ -43,7 +45,8 @@ module Control(
 	
 	assign ALUSrc1 = (OpCode == 6'h00 && (Funct == 6'h00 || Funct == 6'h02 || Funct == 6'h03))? 2'b01: 2'b00;
 
-	assign ALUSrc2 = (OpCode == 6'h23 || OpCode == 6'h2b || OpCode == 6'h0f || OpCode == 6'h08 || OpCode == 6'h09|| OpCode == 6'h0c || OpCode == 6'h0a || OpCode == 6'h0b)? 2'b01:
+	assign ALUSrc2 = (OpCode == 6'h23 || OpCode == 6'h2b || OpCode == 6'h0f || OpCode == 6'h08 || OpCode == 6'h09 ||
+		OpCode == 6'h0a || OpCode == 6'h0b || OpCode == 6'h0c ||  OpCode == 6'h0d)? 2'b01:
 	 	(OpCode == 6'h06 || OpCode == 6'h07 || OpCode == 6'h01)? 2'b10:  0;
 	
 	assign ExtOp = (OpCode == 6'h23 || OpCode == 6'h2b ||  OpCode == 6'h08 || OpCode == 6'h09 || OpCode == 6'h0a || OpCode == 6'h0b)? 1: 0;
@@ -56,6 +59,7 @@ module Control(
 		(OpCode == 6'h00)? 3'b010: 
 		(OpCode == 6'h04 || OpCode == 6'h05 || OpCode == 6'h06 || OpCode == 6'h07 || OpCode == 6'h01)? 3'b001: 
 		(OpCode == 6'h0c)? 3'b100: 
+		(OpCode == 6'h0d)? 3'b011:
 		(OpCode == 6'h0a || OpCode == 6'h0b)? 3'b101: 
 		(OpCode == 6'h1c && Funct == 6'h02)? 3'b110:
 		3'b000; //mul

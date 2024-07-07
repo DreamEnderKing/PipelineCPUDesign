@@ -28,7 +28,7 @@ module UART#(
     
     /*--------------------------------UART RX-------------------------*/
     wire Rx_DV  ;
-    wire Rx_Byte;
+    wire [7:0] Rx_Byte;
     
     uart_rx#(
         .CLKS_PER_BIT(CLKS_PER_BIT)
@@ -64,7 +64,7 @@ module UART#(
             Tx_DV <= 1'b0;
         end else begin
             if (Rx_DV) begin
-                Rx_Data[7:0] <= Rx_Byte;
+                Rx_Data <= {24'b0, Rx_Byte};
             end
 
             if (MemRead && Address == Cond_ADDR) begin

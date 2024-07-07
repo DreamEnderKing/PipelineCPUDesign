@@ -24,10 +24,10 @@ module test();
 		reset   = 1;
 		clk     = 0;
 		clk2	= 0;
-		#100 reset = 0;
+		#10 reset = 0;
 	end
 	
-	always #50 clk = ~clk;
+	always #5 clk = ~clk;
 
 	always #52083 clk2 = ~clk2;
 		
