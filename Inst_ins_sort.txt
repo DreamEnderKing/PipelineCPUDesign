@@ -1,107 +1,167 @@
- Address    Code        Basic                     Source
+init:		li $s0, 0					# operation counter: $s0
+			li $s1, 0x40000010			# peripheral addr: $s1
+			li $gp, 0x0100				# data segment after $gp
+			li $t0, 0x0F40				# display ----
+			sw $t0, 0($s1)
+rn_wait:	lw $t0, 16($s1)
+			andi $t0, $t0, 4
+			bne $t0, 4, rn_wait
+			lw $t0, 12($s1)
+			move $k0, $t0				# N: $k0
+			sw $t0, 0($gp)
+			andi $t1, $t0, 0xF			# display N
+			sll $t1, $t1, 2
+			lw $t1, 0($t1)
+			addi $t1, $t1, 0x0F00
+			sw $t1, 0($s1)
+			li $t2, 12
+rn_throw:	lw $t1, 16($s1)
+			andi $t1, $t1, 4
+			sub $t2, $t2, $t1
+			bne $t2, $0, rn_throw
+			li $t1, 0x0F08				# display ____
+			sw $t1, 0($s1)
+			li $t1, 0					# i: $t1 loop in [0, N) * 4
+			sll $a0, $k0, 2
+r_oloop:	slt $t2, $t1, $a0
+			beq $t2, $0, main
+			li $t2, 4					# j: $t2 loop in (0, 4]
+			li $v0, 0					# get number in little endian way
+r_iloop:	beq $t2, $0, r_iret
+r_iwait:	lw $t3, 16($s1)
+			bne $t3, 4, r_iwait
+			lw $t3, 12($s1)
+			sll $t3, $t3, 24
+			srl $v0, $v0, 8	
+			addi $t2, $t2, -1
+			add $v0, $t3, $v0
+			j r_iloop
+r_iret:		add $t2, $t1, $gp
+			sw $v0, 4($t2)				# save result in data segment
+			addi $t1, $t1, 4
+			j r_oloop
 
-0x00400000  0x241a0001  addiu $26,$0,0x00000001    		li $k0, 1
-0x00400004  0x8c080000  lw $8,0x00000000($0)  2    		lw $t0, 0($0)			# N: $t0
-0x00400008  0x20040004  addi $4,$0,0x00000004 3    		add $a0, $0, 4			# call insertion_sort
-0x0040000c  0x00082821  addu $5,$0,$8         4    		move $a1, $t0
-0x00400010  0x20010004  addi $1,$0,0x00000004 5    		sub $sp, $sp, 4
-0x00400014  0x03a1e822  sub $29,$29,$1             
-0x00400018  0xafa80000  sw $8,0x00000000($29) 6    		sw $t0, 0($sp)
-0x0040001c  0x0c10000c  jal 0x00400030        7    		jal is_call
-0x00400020  0x8fa80000  lw $8,0x00000000($29) 8    		lw $t0, 0($sp)
-0x00400024  0x23bd0004  addi $29,$29,0x00000009    		add $sp, $sp, 4
-0x00400028  0xac100000  sw $16,0x00000000($0) 10   		sw $s0, 0($0)
-0x0040002c  0x08100048  j 0x00400120          11   		j display
-0x00400030  0x2001000c  addi $1,$0,0x0000000c 13   is_call:	sub $sp, $sp, 12
-0x00400034  0x03a1e822  sub $29,$29,$1             
-0x00400038  0xafa40000  sw $4,0x00000000($29) 14   			sw $a0, 0($sp)
-0x0040003c  0xafa50004  sw $5,0x00000004($29) 15   			sw $a1, 4($sp)
-0x00400040  0xafbf0008  sw $31,0x00000008($29)16   			sw $ra, 8($sp)
-0x00400044  0x24080001  addiu $8,$0,0x0000000117   			li $t0, 1			# i: $t0
-0x00400048  0x0105582a  slt $11,$8,$5         18   is_loop:	slt $t3, $t0, $a1
-0x0040004c  0x1160000d  beq $11,$0,0x0000000d 19   			beq $t3, $0, is_ret
-0x00400050  0x00082821  addu $5,$0,$8         20   			move $a1, $t0
-0x00400054  0x20010004  addi $1,$0,0x00000004 21   			sub $sp, $sp, 4
-0x00400058  0x03a1e822  sub $29,$29,$1             
-0x0040005c  0xafa80000  sw $8,0x00000000($29) 22   			sw $t0, 0($sp)
-0x00400060  0x0c100026  jal 0x00400098        23   			jal s_call
-0x00400064  0x00022821  addu $5,$0,$2         24   			move $a1, $v0
-0x00400068  0x8fa60000  lw $6,0x00000000($29) 25   			lw $a2, 0($sp)
-0x0040006c  0x0c100038  jal 0x004000e0        26   			jal i_call
-0x00400070  0x8fa80000  lw $8,0x00000000($29) 27   			lw $t0, 0($sp)
-0x00400074  0x23bd0004  addi $29,$29,0x000000028   			add $sp, $sp, 4
-0x00400078  0x8fa50004  lw $5,0x00000004($29) 29   			lw $a1, 4($sp)
-0x0040007c  0x21080001  addi $8,$8,0x00000001 30   			add $t0, $t0, 1
-0x00400080  0x08100012  j 0x00400048          31   			j is_loop
-0x00400084  0x8fa40000  lw $4,0x00000000($29) 32   is_ret:		lw $a0, 0($sp)
-0x00400088  0x8fa50004  lw $5,0x00000004($29) 33   			lw $a1, 4($sp)
-0x0040008c  0x8fbf0008  lw $31,0x00000008($29)34   			lw $ra, 8($sp)
-0x00400090  0x23bd000c  addi $29,$29,0x000000035   			add $sp, $sp, 12
-0x00400094  0x03e00008  jr $31                36   			jr $ra
-0x00400098  0x00054080  sll $8,$5,0x00000002  38   s_call:		sll $t0, $a1, 2			# tmp: $t0
-0x0040009c  0x01044020  add $8,$8,$4          39   			add $t0, $t0, $a0
-0x004000a0  0x8d080000  lw $8,0x00000000($8)  40   			lw $t0, 0($t0)
-0x004000a4  0x20010001  addi $1,$0,0x00000001 41   			sub $t1, $a1, 1			# i: $t1
-0x004000a8  0x00a14822  sub $9,$5,$1               
-0x004000ac  0x0120582a  slt $11,$9,$0         42   s_loop:		slt $t3, $t1, $0
-0x004000b0  0x15600009  bne $11,$0,0x00000009 43   			bne $t3, $0, s_ret
-0x004000b4  0x22100001  addi $16,$16,0x000000044   			add $s0, $s0, 1
-0x004000b8  0x00095080  sll $10,$9,0x00000002 45   			sll $t2, $t1, 2			# v[i]: $t2
-0x004000bc  0x01445020  add $10,$10,$4        46   			add $t2, $t2, $a0
-0x004000c0  0x8d4a0000  lw $10,0x00000000($10)47   			lw $t2, 0($t2)
-0x004000c4  0x010a582a  slt $11,$8,$10        48   			slt $t3, $t0, $t2
-0x004000c8  0x11600003  beq $11,$0,0x00000003 49   			beq $t3, $0, s_ret
-0x004000cc  0x20010001  addi $1,$0,0x00000001 50   			sub $t1, $t1, 1
-0x004000d0  0x01214822  sub $9,$9,$1               
-0x004000d4  0x0810002b  j 0x004000ac          51   			j s_loop
-0x004000d8  0x21220001  addi $2,$9,0x00000001 52   s_ret:		add $v0, $t1, 1
-0x004000dc  0x03e00008  jr $31                53   			jr $ra
-0x004000e0  0x20010001  addi $1,$0,0x00000001 55   i_call:		sub $t0, $a2, 1			# &v[i]: $t0, initial: v[n-1]
-0x004000e4  0x00c14022  sub $8,$6,$1               
-0x004000e8  0x00084080  sll $8,$8,0x00000002  56   			sll $t0, $t0, 2
-0x004000ec  0x01044020  add $8,$8,$4          57   			add $t0, $t0, $a0
-0x004000f0  0x8d090004  lw $9,0x00000004($8)  58   			lw $t1, 4($t0)			# tmp: $t1
-0x004000f4  0x00055080  sll $10,$5,0x00000002 59   			sll $t2, $a1, 2			# &v[k]: $t2
-0x004000f8  0x01445020  add $10,$10,$4        60   			add $t2, $t2, $a0
-0x004000fc  0x010a582a  slt $11,$8,$10        61   i_loop:		slt $t3, $t0, $t2
-0x00400100  0x15600005  bne $11,$0,0x00000005 62   			bne $t3, $0, i_ret
-0x00400104  0x8d0b0000  lw $11,0x00000000($8) 63   			lw $t3, 0($t0)
-0x00400108  0xad0b0004  sw $11,0x00000004($8) 64   			sw $t3, 4($t0)
-0x0040010c  0x20010004  addi $1,$0,0x00000004 65   			sub $t0, $t0, 4
-0x00400110  0x01014022  sub $8,$8,$1               
-0x00400114  0x0810003f  j 0x004000fc          66   			j i_loop
-0x00400118  0xad490000  sw $9,0x00000000($10) 67   i_ret:		sw $t1, 0($t2)
-0x0040011c  0x03e00008  jr $31                68   			jr $ra
-0x00400120  0x00082080  sll $4,$8,0x00000002  70   display:	sll $a0, $t0, 2			# N: $a0
-0x00400124  0x240500fa  addiu $5,$0,0x000000fa71   			li $a1, 250				# j upper limit: 250
-0x00400128  0x24061000  addiu $6,$0,0x0000100072   			li $a2, 0x1000			# k upper limit: 0x1000
-0x0040012c  0x3c074000  lui $7,0x00004000     73   			lui $a3, 0x4000			# bcd memory
-0x00400130  0x20e70010  addi $7,$7,0x00000010 74   			addi $a3, $a3, 0x0010
-0x00400134  0x24080000  addiu $8,$0,0x0000000075   			li $t0, 0				# i: $t0 loop in [0, N]
-0x00400138  0x0104482a  slt $9,$8,$4          76   dis_oloop:	slt $t1, $t0, $a0
-0x0040013c  0x11200018  beq $9,$0,0x00000018  77   			beq $t1, $0, dis_oret
-0x00400140  0x24090000  addiu $9,$0,0x0000000078   			li $t1, 0				# j: $t1 loop in [0, 100]
-0x00400144  0x0125502a  slt $10,$9,$5         79   dis_mloop:	slt $t2, $t1, $a1
-0x00400148  0x11400013  beq $10,$0,0x00000013 80   			beq $t2, $0, dis_mret
-0x0040014c  0x240a0100  addiu $10,$0,0x000001081   			li $t2, 0x100			# k: $t2 loop in [0x100, 0x1000)
-0x00400150  0x8d190000  lw $25,0x00000000($8) 82   			lw $t9, 0($t0)			# display $t9
-0x00400154  0x0146582a  slt $11,$10,$6        83   dis_iloop:	slt $t3, $t2, $a2
-0x00400158  0x1160000d  beq $11,$0,0x0000000d 84   			beq $t3, $0, dis_iret
-0x0040015c  0x332b000f  andi $11,$25,0x000000085   			andi $t3, $t9, 0xF
-0x00400160  0x216b0020  addi $11,$11,0x000000286   			addi $t3, $t3, 0x20		# bcd code memory: 0x20 word
-0x00400164  0x000b5880  sll $11,$11,0x0000000287   			sll $t3, $t3, 2
-0x00400168  0x8d6c0000  lw $12,0x00000000($11)88   			lw $t4, 0($t3)
-0x0040016c  0x018a6025  or $12,$12,$10        89   			or $t4, $t4, $t2		# combine bcd code with sel in k
-0x00400170  0xacec0000  sw $12,0x00000000($7) 90   			sw $t4, 0($a3)
-0x00400174  0x0019c902  srl $25,$25,0x0000000491   			srl $t9, $t9, 4
-0x00400178  0x000a5040  sll $10,$10,0x0000000192   			sll $t2, $t2, 1
-0x0040017c  0x3c010001  lui $1,0x00000001     93   			li $t5, 100000			# sleep for 1ms
-0x00400180  0x342d86a0  ori $13,$1,0x000086a0      
-0x00400184  0x21adffff  addi $13,$13,0xfffffff94   sleep:		addi $t5, $t5, -1
-0x00400188  0x15a0fffe  bne $13,$0,0xfffffffe 95   			bne $t5, $0, sleep
-0x0040018c  0x08100055  j 0x00400154          96   			j dis_iloop
-0x00400190  0x21290001  addi $9,$9,0x00000001 97   dis_iret:	addi $t1, $t1, 1
-0x00400194  0x08100051  j 0x00400144          98   			j dis_mloop
-0x00400198  0x21080004  addi $8,$8,0x00000004 99   dis_mret:	addi $t0, $t0, 4
-0x0040019c  0x0810004e  j 0x00400138          100  			j dis_oloop
-0x004001a0  0x08100068  j 0x004001a0          101  dis_oret:	j dis_oret
+main:		move $t0, $k0				# N; $t0(stored in $k0)
+			li $t1, 0x0F5C
+			sw $t1, 0($s1)				# display oooo
+			addi $a0, $gp, 4			# call insertion_sort
+			move $a1, $k0
+			addi $sp, $sp, -4
+			sw $t0, 0($sp)
+			jal is_call
+			lw $t0, 0($sp)
+			add $sp, $sp, 4
+			sw $s0, 0($gp)
+			j display
+
+is_call:	addi $sp, $sp, -12
+			sw $a0, 0($sp)
+			sw $a1, 4($sp)
+			sw $ra, 8($sp)
+			li $t0, 1					# i: $t0 loop in [1, N)
+is_loop:	slt $t3, $t0, $a1
+			beq $t3, $0, is_ret
+			move $a1, $t0
+			add $sp, $sp, -4
+			sw $t0, 0($sp)
+			jal s_call
+			move $a1, $v0
+			lw $a2, 0($sp)
+			jal i_call
+			lw $t0, 0($sp)
+			add $sp, $sp, 4
+			lw $a1, 4($sp)
+			add $t0, $t0, 1
+			j is_loop
+is_ret:		lw $ra, 8($sp)
+			lw $a1, 4($sp)
+			lw $a0, 0($sp)
+			add $sp, $sp, 12
+			jr $ra
+
+s_call:		sll $t0, $a1, 2				# tmp: $t0
+			add $t0, $t0, $a0
+			lw $t0, 0($t0)
+			addi $t1, $a1, -1			# i: $t1
+s_loop:		slt $t3, $t1, $0
+			bne $t3, $0, s_ret
+			add $s0, $s0, 1
+			sll $t2, $t1, 2				# v[i]: $t2
+			add $t2, $t2, $a0
+			lw $t2, 0($t2)
+			slt $t3, $t0, $t2
+			beq $t3, $0, s_ret
+			addi $t1, $t1, -1
+			j s_loop
+s_ret:		add $v0, $t1, 1
+			jr $ra
+
+i_call:		addi $t0, $a2, -1			# &v[i]: $t0, initial: v[n-1]
+			sll $t0, $t0, 2
+			add $t0, $t0, $a0
+			lw $t1, 4($t0)				# tmp: $t1
+			sll $t2, $a1, 2				# &v[k]: $t2
+			add $t2, $t2, $a0
+i_loop:		slt $t3, $t0, $t2
+			bne $t3, $0, i_ret
+			lw $t3, 0($t0)
+			sw $t3, 4($t0)
+			addi $t0, $t0, -4
+			j i_loop
+i_ret:		sw $t1, 0($t2)
+			jr $ra
+			
+display:	addi $a0, $k0, 1
+			sll $a0, $a0, 2				# N + 1: $a0
+			add $a0, $a0, $gp
+			li $a1, 100					# j upper limit: $a1
+			li $a2, 0x1000				# k upper limit: 0x1000
+			move $t0, $gp				# i: $t0 loop in [0, N+1] with offset $gp
+dis_oloop:	slt $t1, $t0, $a0
+			beq $t1, $0, send
+			li $t1, 0					# j: $t1 loop in [0, $a1)
+dis_mloop:	slt $t2, $t1, $a1
+			beq $t2, $0, dis_mret
+			li $t2, 0x100				# k: $t2 loop in [0x100, 0x1000)
+			lw $t9, 0($t0)				# display $t9
+dis_iloop:	slt $t3, $t2, $a2
+			beq $t3, $0, dis_iret
+			andi $t3, $t9, 0xF
+			sll $t3, $t3, 2
+			lw $t4, 0($t3)
+			or $t4, $t4, $t2			# combine bcd code with sel in k
+			sw $t4, 0($s1)
+			srl $t9, $t9, 4
+			sll $t2, $t2, 1
+			li $t5, 100000				# sleep for 1ms
+sleep:		addi $t5, $t5, -1
+			bne $t5, $0, sleep
+			j dis_iloop
+dis_iret:	addi $t1, $t1, 1
+			j dis_mloop
+dis_mret:	addi $t0, $t0, 4
+			j dis_oloop
+
+send:		li $t0, 0x0F23
+			sw $t0, 0($s1)				# display ^^^^
+			addi $a0, $k0, 1
+			add $a0, $a0, $gp
+			sll $a0, $a0, 2
+			move $t0, $gp
+send_oloop:	slt $t1, $t0, $a0
+			beq $t1, $0, end
+			lw $t9, 0($t0)
+			lui $t1, 0xFF00				# send $t9 in big endian way
+send_iloop:	beq $t9, $0, send_iret
+			and $t2, $t1, $t9
+			srl $t2, $t2, 24
+			sw $t2, 8($s1)
+send_wait:	lw $t3, 16($s1)
+			bne $t3, 2, send_wait
+			sll $t9, $t9, 8
+			j send_iloop
+send_iret:	addi $t0, $t0, 4
+			j send_oloop
+end:		li $t0, 0x0F71
+			sw $t0, 0($s1)				# display FFFF
+tail:		j tail
